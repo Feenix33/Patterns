@@ -1,90 +1,96 @@
 //
+// more patterns
+// add rotation
+// color changing
+// control how to use colors
 //
 
+let boxes = [];
+let param01 = null;
+
+function cmePatternParams (side, rot=0,
+    pens= {0: 'black', outline: 'blue'},
+    crayons= {0: 'lightgrey', background: 'whitesmoke'}
+  ) {
+  // use with var item = new Item(params);
+  this.side = side; 
+  this.rotate = rot;
+  this.pens = pens;
+  this.crayons = crayons;
+}
+
 class cmePattern {
-  constructor(pattern, x, y, seg, pens=['#8080ff'], crayons=['#ffff80']) {
+  // start with everything on a 0-100 scale until problematic
+  constructor (pattern, x, y, params) {
+    this.pattern = pattern;
     this.x = x;
     this.y = y;
-    this.seg = seg; // segment size length, assume square
-    this.pattern = pattern;
-    this.pens = pens;
-    this.crayons = crayons;
+    this.p = params; // side length, assume square
   }
-
-  
-  //static staticCrayon = 1;
-  //static staticSetCrayon(x) { cmePattern.staticCrayon = x; }
-  // use in a function
-  // print ("Static value =" + cmePattern.staticCrayon);
-  // cmePattern.staticSetCrayon (5);
-  // print ("Static value =" + cmePattern.staticCrayon);
-
-  draw() {
+  draw_bgn() { // common start for all derived classes
     push()
-    strokeWeight(2);
     translate(this.x, this.y);
-    scale(this.seg / 100.);
-
-    switch (this.pattern) {
-      case 3: this.pattern03(); break;
-      case 4: this.pattern04(); break;
-      case 6: this.pattern06(); break;
-      default:
-        console.log("Unknown pattern type", this.pattern);
-    }
-
+    scale(this.side / 100.);
+  }
+  draw () {  // a default draw, expect that each routine does their own thing
+    this.draw_bgn();
+    fill('#d3d3d3');
+    stroke('8b4513');
+    strokeWeight(3);
+    rect (this.x, this.y, this.p.side, this.p.side);
+    this.draw_end();
+  }
+  draw_end() {
     pop();
-  }
-  print() {
-    print ("x,y="+this.x +","+ this.y + "    pens=" +this.pens);
-  }
-
-  pattern03() {  // an v
-    fill(this.crayons[0]);
-    stroke(this.pens[0]);
-    rect(0, 0, 100, 100);
-    line(0, 100, 50, 0);
-    line(100, 100, 50, 0);
-  }
-
-  pattern04() {  // an x
-    fill(this.crayons[0]);
-    stroke(this.pens[0]);
-    rect(0, 0, 100, 100);
-    line(0, 0, 100, 100);
-    line(100, 0, 0, 100);
-  }
-
-  pattern06() {  // diagonals on half
-    fill(this.crayons[0]);
-    stroke(this.pens[0]);
-    rect(0, 0, 100, 100);
-    line (0,0, 100, 100);
-    line (25,0, 100, 75);
-    line (50,0, 100, 50);
-    line (75,0, 100, 25);
   }
 }
 
-let boxes = [];
+class cmePattern00 extends cmePattern {
+  draw () {
+    this.draw_bgn();
+    fill (this.p.crayons.background);
+    stroke(this.p.pens[0]);
+    strokeWeight(1);
+    rect (this.x, this.y, this.p.side, this.p.side);
+    fill(this.p.crayons[0]);
+    stroke('darkviolet');
+    strokeWeight(3);
+    circle(this.x+50, this.y+50, 50);
+    this.draw_end();
+  }
+}
 
+
+
+// --------------------------------------------------------------------------------
 function setup() {
   print ("running @"+hour()+":"+minute());
   var penpal = ['#ff0000','#ff8080'];
 
-  createCanvas(415, 415);
-  for (var x=5; x < width; x+= 205) {
-    for (var y=5; y < height; y+= 205) {
-      boxes.push(new cmePattern(6, x, y, 190, ['orange'], ['blue']));
-    }
-  }
-  boxes[0].print();
+  createCanvas(400, 400);
+  param01 = new cmePatternParams (100);
+  boxes.push(new cmePattern00 (1, 25, 25, param01));
+  boxes.push(new cmePattern00 (1, 125, 25, param01));
+
+  var dict = {
+    FirstName: "Chris",
+    "one": 1,
+    1: "some value"
+  };
+  dict["one"] = 10;
+  print ("dict = " + dict.FirstName + " " + dict["one"]);
+  print ("tests t/f =" + ("one" in dict) + " / " + ("fart" in dict));
 }
 
+// --------------------------------------------------------------------------------
 function draw() {
   background('#f0f0f0');
+  noFill()
   stroke(0);
-  fill("blue");
+  for (var x=0; x < 400; x+= 100) {
+    line(x, 0, x, 400);
+    line(0, x, 400, x); // the x is y
+  }
   for (var j=0; j< boxes.length; j++) {
     boxes[j].draw();
   }
