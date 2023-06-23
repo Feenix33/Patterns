@@ -1,7 +1,5 @@
 //  imageSquare
 //  convert the whole image to tiles and replace w/avg value
-//  . randomly move the end pts around
-//  . combine some tiles to make diff size rects
 
 
 
