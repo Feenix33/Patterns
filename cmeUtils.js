@@ -1,7 +1,7 @@
 // my base utility functions for use w/p5.js programs
 // eventually need to move to a helpers/function_name.js style
 
-var cmeUtils = {
+var cme = {
   isNull: function (value) { return value === null; },
   minmax: function (value, min=0, max=100) {
     return Math.min(max, Math.max(min, value));
