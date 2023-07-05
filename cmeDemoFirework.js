@@ -10,6 +10,7 @@ const gravity = 0.25;
 
 var particles;
 var gCounter;
+let gHouses;
 
 
 // --------------------------------------------------------------------------------
@@ -82,10 +83,48 @@ function drawGradientBackground(c1, c2, n) {
     rect(0, y, width, dh);
   }
 }
+
+
+function makeHouses() {
+	const winWidth = 15;
+	const winHeight = 25;
+  const winDeltaX = 10;
+  const winDeltaY = 20;
+  const winOn = 0.25; // less than this and window is on
+  const bldgWidth = 3*winDeltaX + 2*winWidth;
+
+  let x=0, ht; // bldg control
+  let wx, wy; // window control
+
+	gHouses = createGraphics(width, height);
+  gHouses.stroke('black');
+  gHouses.strokeWeight(3);
+
+  while (x < width) {
+    ht = int(random(2, 9)) * 20;
+    gHouses.fill(128);
+    gHouses.rect(x, height-ht, bldgWidth, ht);
+
+    wy = height-ht+winDeltaX;
+    while (wy < height) {
+      wx = x + winDeltaX;
+      while (wx < (x+bldgWidth)) {
+        
+        if (random() < winOn) { gHouses.fill('yellow'); }
+        else { gHouses.fill(64); }
+        gHouses.rect(wx, wy, winWidth, winHeight);
+        wx += (winDeltaX + winWidth);
+      }
+      wy = wy + winDeltaY + winHeight;
+    }
+
+    x += bldgWidth;
+  }
+}
+
 // --------------------------------------------------------------------------------
 function preload() {
 }
-
 
 var b1, b2;
 function setup() {
@@ -95,6 +134,7 @@ function setup() {
   gCounter = 0;
   b1 = random(cme.crayons48);
   b2 = random(cme.crayons48);
+  makeHouses();
 }
 
 // --------------------------------------------------------------------------------
@@ -114,6 +154,7 @@ function draw() {
     gCounter = random(15, 60);
     particles.push (new Train (random(width), height, random(-3,3), -random(8, 15), random(crayons), true));
   }
+	image(gHouses, 0, 0);
 }
 // --------------------------------------------------------------------------------
 function mousePressed() {
