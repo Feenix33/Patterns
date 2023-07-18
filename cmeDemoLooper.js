@@ -4,10 +4,11 @@
 // x change color to be slowly changing -- not that great
 // x +/1 change total num of loops
 // x use p5 h w instead of constants
-// loops stert on other sides
-// alternative color
+// x loops stert on other sides
+// x alternative color
 
 let gLoops;
+let gBackground = false;
 
 const canvasW = 1000; // canvas size
 const canvasH = 550; // canvas size
@@ -19,11 +20,57 @@ var gDot;
 class Looper {
 
   constructor(x, y){
-    this.x = x;
-    this.y = y;
-    this.xPrev = x;
-    this.yPrev= y;
-    this.heading = 0;
+    let star = random();
+    if (star < 0.25) {
+      this.x = random(width);
+      this.y = height-1;
+      this.heading = 3*PI/2;
+    }
+    else if (star < 0.50) {
+      this.x = random(width);
+      this.y = 0;
+      this.heading = PI/2;
+    }
+    else if (star < 0.75) {
+      this.x = 0;
+      this.y = random(height);
+      this.heading = 0;
+    }
+    else {
+      this.x = width-1;
+      this.y = random(height);
+      this.heading = PI;
+    }
+
+    this.xPrev = this.x;
+    this.yPrev= this.y;
+    this.speed = random(0.5, 3.5); //random(1, 5);
+    this.c = color('red');
+    this.c = color(cme.getRandomColor()); //color('red');
+    this.turning = 0; // if non-zero then turn; turn countdown timer
+    this.turnVel = 0.025 * (random(1) < .5 ? 1 : -1);; // turn left or right
+    this.isAlive = true;
+
+    this.sinOffset = random(100);
+  }
+  update () {
+    //var headOffset = randomGaussian() * .1 + sin(this.sinOffset + frameCount * .1) * 0.25;
+    var headOffset = sin(this.sinOffset + frameCount * .1) * .025;
+    
+    if (this.turning > 0) {
+      //headOffset = 0;
+      this.heading += this.turnVel;
+      this.turning -= 1;
+    }
+    else {
+      if (random() < turnChance) {
+        this.forceTurn();
+      }
+    }
+    this.heading += headOffset;
+    this.constrainHeading();
+    this.xPrev = this.x;
+    this.yPrev= this.y;
     this.speed = random(0.5, 3.5); //random(1, 5);
     this.c = color('red');
     this.c = color(cme.getRandomColor()); //color('red');
@@ -53,7 +100,8 @@ class Looper {
     this.yPrev = this.y;
     this.x += cos(this.heading) * this.speed;
     this.y += sin(this.heading) * this.speed;
-    this.shiftColor();
+    //this.shiftColor();
+    this.c = darkenColor(this.c, 1);
   }
   draw () {
     //noStroke();
@@ -84,6 +132,14 @@ class Looper {
 }
 // --------------------------------------------------------------------------------
 
+function darkenColor(c, n=1) {
+  return color(
+    cme.minmax((red(c) - n), 0,255),
+    cme.minmax((green(c) - n), 0,255),
+    cme.minmax((blue(c) - n), 0,255)
+  );
+}
+
 function destroyOffscreen() {
   for(const lp of gLoops){
     if (lp.x < 0 || lp.x > width  || lp.y < 0 || lp.y > height ) {
@@ -96,7 +152,7 @@ function restart() {
   gLoops = [];
   background(0, 0, 128); // noFill() stroke(0);
   for (var i=0; i < gLoopPop; i++) {
-    gLoops.push(new Looper(0, random(height)));
+    gLoops.push(new Looper());
   }
 }
 
@@ -125,6 +181,7 @@ function setup() {
 // --------------------------------------------------------------------------------
 function draw() {
   //background(128); // noFill() stroke(0);
+  if (gBackground) { background(28, 3); }
   for(const lp of gLoops){
     lp.draw();
     lp.update();
@@ -132,7 +189,7 @@ function draw() {
   destroyOffscreen();
   gLoops = gLoops.filter((p) => p.isAlive);
   while (gLoops.length < gLoopPop) {
-      gLoops.push(new Looper(0, random(height)));
+      gLoops.push(new Looper());
   }
   gDot = doShiftColor(gDot);
   fill(gDot);
@@ -144,6 +201,7 @@ function keyReleased() {
   switch (key) {
     case '+': ++gLoopPop; break;
     case '-': if (gLoopPop > 0) {--gLoopPop;} break;
+    case 'b': gBackground = !gBackground; break;
     case 'd':
       gLoops[int(random(gLoops.length))].isAlive = false;
       break;
